@@ -1,0 +1,12 @@
+[
+    {
+        "itemID": "pruszko.carousel_warn_remover.view",
+        "type": "Layout",
+        "path": "coui://gui/gameface/carousel_warn_remover/CarouselWarnRemoverView.html",
+        "parameters": {
+            "extension": "",
+            "entrance": "CarouselWarnRemoverView",
+            "impl": "gameface"
+        }
+    }
+]
