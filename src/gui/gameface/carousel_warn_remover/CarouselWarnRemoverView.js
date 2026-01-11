@@ -1,86 +1,39 @@
-// in "gui/gameface/_dist/production/mono/hangar/chunks/lib.js"
-// there is kinda this code:
+let domObserver = new MutationObserver(() => {
+    // div:first-child is container for background images
+    // div:nth-child(2) may have a little obfuscated "dimmed" class that dims vehicle icon
+    document.querySelectorAll(
+        'div.vehicle-card[data-name="Slot"] div[data-name="Content"] > div:first-child > div:nth-child(2)'
+    ).forEach((backgroundElement) => {
+        let dimmedClassName = Array
+            .from(backgroundElement.classList)
+            .find(className => className.indexOf("dimmed") !== -1);
 
-/*
-const resources = createContainer();
-...
-class StringsRClassProvider {
-    ...
-    readOrEmpty(e, t = "warn") {
-        return this.readOr(e, (() => ""), t)
-    }
-    ...
-}
-...
-resources.register({
-    strings: asFunction((() => new StringsRClassProvider)).singleton(),
-    ...
-});
-...
-export {
-    ..., resources as r, ...
-}
-*/
-
-// `readOrEmpty` method is used by `FormatString` function (component)
-// but we cannot override `FormatString` itself
-// however, we can override `readOrEmpty` method that is used by FormatString
-// which is used by components rendering warn text in vehicle cards
-//
-// so, first we want to capture `resources.resolve("strings")` result object
-// which is of `StringsRClassProvider` class
-// which handles translations
-// including those that we want to remove
-//
-// but we cannot simply `import { r as resources } from "..."`
-// because exported alias might be different with each WoT build
-// so we have to (hopefully) guess it
-//
-// so, iterate over all exports and:
-// - find something resembling container object (`register` and `resolve` functions)
-// - hope that it has "strings" registration
-// - if it really is our `StringsRClassProvider`, it should have `readOrEmpty` function
-import * as libExports from "../_dist/production/mono/hangar/chunks/lib.js"
-
-let resources = Object.values(libExports).find(libExport => {
-    if (typeof libExport.register !== "function") return false;
-    if (typeof libExport.resolve !== "function") return false;
-
-    try {
-        let stringObject = libExport.resolve("strings");
-        if (stringObject && typeof stringObject.readOrEmpty === "function") {
-            return true;
+        if (dimmedClassName !== undefined) {
+            backgroundElement.classList.remove(dimmedClassName);
         }
+    });
+    
+    // first div:nth-child(2) is vehicle card that contains info; it is on background
+    // second div:nth-child(2) is (if present) an overlay that dims background
+    document.querySelectorAll(
+        'div.vehicle-card[data-name="Slot"] div[data-name="Content"] > div:nth-child(2) > div:nth-child(2)'
+    ).forEach((overlayEl) => {
+        // we want to remove background image that dims and display lines on entire card
+        overlayEl.style.backgroundImage = "none";
 
-        return false;
-    }
-    catch (e) {
-        return false;
-    }
+        // remove FormatText that displays warn text covering tank name
+        overlayEl.querySelectorAll("div > span").forEach((spanEl) => {
+            spanEl.remove();
+        });
+    });
+
+    // add simple small background rectangle behind icon to make icon easier to read
+    document.querySelectorAll(
+        'div.vehicle-card[data-name="Slot"] div[data-name="Content"] > div:nth-child(2) > div:nth-child(2) > div > div'
+    ).forEach((alertIconEl) => {
+        alertIconEl.style.backgroundColor = "rgba(0, 0, 0, 0.6)";
+        alertIconEl.style.borderRadius = "10px";
+    });
 });
 
-if (resources) {
-    // ignore those keys, because those are VERY common
-    // and due to this are annoying
-    let ignoredKeys = [
-        "menu.tankCarousel.vehicleStates.crewNotFull",
-        "menu.tankCarousel.vehicleStates.ammoNotFull",
-        "menu.tankCarousel.vehicleStates.rentalIsOver",
-        "menu.tankCarousel.vehicleStates.battle",
-        "menu.tankCarousel.vehicleStates.inPrebattle",
-    ];
-
-    let stringsObject = resources.resolve("strings");
-
-    let oldReadOrEmpty = stringsObject.readOrEmpty;
-    stringsObject.readOrEmpty = function (key, errorType = "warn") {
-        if (ignoredKeys.indexOf(key) !== -1) {
-            return "";
-        }
-
-        return oldReadOrEmpty.apply(this, arguments);
-    }
-}
-else {
-    console.error("Could not find resources object containing translations, skipping carousel warn removing");
-}
+domObserver.observe(document.body, { childList: true, subtree: true });

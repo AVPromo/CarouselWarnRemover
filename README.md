@@ -1,8 +1,8 @@
 # Carousel Warn Remover
-A mod for World of Tanks that removes warn text in tank carousel cards
-that covers tank names (and does it in a more compatible way).
+A mod for World of Tanks that removes warn text and overlay dim 
+in tank carousel cards (and does it in a more compatible way).
 
-![Mod logo](images/logo.png)
+![Mod logo](images/comparison.png)
 
 ## Feedback
 You can:
