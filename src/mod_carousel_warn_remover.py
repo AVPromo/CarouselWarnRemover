@@ -4,7 +4,7 @@ from frameworks.wulf import ViewModel
 from gui.impl.lobby.hangar.random.random_hangar import RandomHangar
 from gui.impl.pub.view_component import ViewComponent
 
-from openwg_gameface import gf_mod_inject, ModDynAccessor, manager
+from openwg_gameface import gf_mod_inject, ModDynAccessor
 
 
 log = logging.getLogger(__name__)
@@ -72,10 +72,6 @@ class CarouselWarnRemoverView(ViewComponent[CarouselWarnRemoverModel]):
 def _initChildren(func, self):
     self = self  # type: RandomHangar
     func(self)
-
-    if not manager.isResMapValidated:
-        return
-
     self.setChildView(
         resourceID=CarouselWarnRemoverView.VIEW_LAYOUT_ID(),
         view=CarouselWarnRemoverView()
